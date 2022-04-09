@@ -1,4 +1,5 @@
 use super::method::{Method, MethodError};
+use super::Header;
 use super::QueryString;
 use std::convert::TryFrom;
 use std::error::Error;
@@ -10,6 +11,7 @@ use std::str::Utf8Error;
 pub struct Request<'buff> {
   path: &'buff str,
   query_string: Option<QueryString<'buff>>,
+  headers: Header<'buff>,
   method: Method,
 }
 
@@ -32,10 +34,10 @@ impl<'buff> TryFrom<&'buff [u8]> for Request<'buff> {
 
   fn try_from(buffer: &'buff [u8]) -> Result<Request<'buff>, Self::Error> {
     let request = str::from_utf8(buffer)?;
-
     let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
     let (mut path, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
-    let (protocol, _) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
+    let (protocol, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
+    let (headers, _) = get_headers(request).ok_or(ParseError::InvalidRequest)?;
 
     if protocol != "HTTP/1.1" {
       return Err(ParseError::InvalidProtocol);
@@ -52,6 +54,7 @@ impl<'buff> TryFrom<&'buff [u8]> for Request<'buff> {
     Ok(Self {
       path,
       query_string,
+      headers,
       method,
     })
   }
@@ -65,6 +68,20 @@ fn get_next_word(request: &str) -> Option<(&str, &str)> {
   }
 
   None
+}
+
+fn get_headers(request: &str) -> Option<(Header, &str)> {
+  let index = match request.find("\r\n\r\n") {
+    Some(n) => n,
+    _ => return None,
+  };
+
+  let headers: &str = &request[1..index]; // removing the first one because it's \n
+  let rest_of_request = &request[index + 1..];
+
+  let headers = Header::from(headers);
+
+  Some((headers, rest_of_request))
 }
 
 pub enum ParseError {
