@@ -1,4 +1,4 @@
-use super::http::{Method, Request, Response, StatusCode};
+use super::http::{Method, QueryStringValue, Request, Response, StatusCode};
 use super::server::Handler;
 use std::collections::HashMap;
 use std::fs;
@@ -43,6 +43,50 @@ impl Handler for WebsiteHandler {
             StatusCode::Ok,
             Some(json_body),
             Some(HashMap::from([("Content-Type", "application/json")])),
+          )
+        }
+        "/headers" => {
+          let headers = request.headers().get();
+          let mut body: String = String::new();
+          for (key, value) in headers.iter() {
+            body.push_str(&format!("<b>{}</b>: {}<br />", key, value));
+          }
+          Response::new(StatusCode::Ok, Some(body), None)
+        }
+        "/query" => {
+          let mut body: String = String::from("<h3>Add query strings!</h3><br />");
+          if let Some(query_strings) = request.query_string() {
+            for (key, value) in query_strings.all().iter() {
+              match value {
+                QueryStringValue::Single(query_string_value) => {
+                  body.push_str(&format!("<b>{}</b>: {}<br />", key, query_string_value));
+                }
+                QueryStringValue::Multiple(values) => {
+                  body.push_str(&format!("<b>{}</b>: {}<br />", key, values.join(", ")));
+                }
+              }
+            }
+          }
+          Response::new(
+            StatusCode::Ok,
+            Some(body),
+            Some(HashMap::from([("Content-Type", "text/html")])),
+          )
+        }
+        "/query/foo" => {
+          let mut body = String::from("The value of foo is: ");
+          if let Some(query_strings) = request.query_string() {
+            if let Some(foo) = query_strings.get("foo") {
+              match foo {
+                QueryStringValue::Single(value) => body.push_str(value),
+                QueryStringValue::Multiple(values) => body.push_str(&values.join(", ")),
+              }
+            }
+          }
+          Response::new(
+            StatusCode::Ok,
+            Some(body),
+            Some(HashMap::from([("Content-Type", "text/html")])),
           )
         }
         path => match self.read_file(path) {

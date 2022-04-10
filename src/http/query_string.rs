@@ -15,6 +15,10 @@ impl<'buff> QueryString<'buff> {
   pub fn get(&self, key: &str) -> Option<&Value> {
     self.data.get(key)
   }
+
+  pub fn all(&self) -> &HashMap<&str, Value> {
+    &self.data
+  }
 }
 
 impl<'buff> From<&'buff str> for QueryString<'buff> {

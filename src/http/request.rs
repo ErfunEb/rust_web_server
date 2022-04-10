@@ -27,6 +27,10 @@ impl<'buff> Request<'buff> {
   pub fn query_string(&self) -> Option<&QueryString> {
     self.query_string.as_ref()
   }
+
+  pub fn headers(&self) -> &Header {
+    &self.headers
+  }
 }
 
 impl<'buff> TryFrom<&'buff [u8]> for Request<'buff> {

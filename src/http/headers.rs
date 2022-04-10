@@ -5,6 +5,12 @@ pub struct Header<'a> {
   data: HashMap<&'a str, &'a str>,
 }
 
+impl<'a> Header<'a> {
+  pub fn get(&self) -> &HashMap<&str, &str> {
+    &self.data
+  }
+}
+
 impl<'a> From<&'a str> for Header<'a> {
   fn from(s: &'a str) -> Self {
     let mut data = HashMap::new();
