@@ -1,5 +1,6 @@
 use super::http::{Method, Request, Response, StatusCode};
 use super::server::Handler;
+use std::collections::HashMap;
 use std::fs;
 
 pub struct WebsiteHandler {
@@ -20,9 +21,9 @@ impl WebsiteHandler {
         } else {
           println!("Directory Traversal Attack Attempted: {}", file_path);
           None
-        } 
+        }
       }
-      Err(_) => None
+      Err(_) => None,
     }
   }
 }
@@ -31,13 +32,25 @@ impl Handler for WebsiteHandler {
   fn handle_request(&mut self, request: &Request) -> Response {
     match request.method() {
       Method::GET => match request.path() {
-        "/" => Response::new(StatusCode::Ok, self.read_file("index.html")),
+        "/" => Response::new(
+          StatusCode::Ok,
+          self.read_file("index.html"),
+          Some(HashMap::from([("Content-Type", "text/html")])),
+        ),
+        "/json" => {
+          let json_body = "{\"message\":\"Hello\"}".to_owned();
+          Response::new(
+            StatusCode::Ok,
+            Some(json_body),
+            Some(HashMap::from([("Content-Type", "application/json")])),
+          )
+        }
         path => match self.read_file(path) {
-          Some(contents) => Response::new(StatusCode::Ok, Some(contents)),
-          None => Response::new(StatusCode::NotFound, None),
-        },  
+          Some(contents) => Response::new(StatusCode::Ok, Some(contents), None),
+          None => Response::new(StatusCode::NotFound, None, None),
+        },
       },
-      _ => Response::new(StatusCode::NotFound, None),
+      _ => Response::new(StatusCode::NotFound, None, None),
     }
   }
 }
