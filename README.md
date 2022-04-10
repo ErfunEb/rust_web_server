@@ -30,3 +30,12 @@ Or alternatively, instead of build and manually run the executable, you can run 
 ```sh
 cargo run
 ```
+
+## Endpoints
+
+- `/` Loads a static HTML file from public directory
+- `/json` returns a JSON output with related header
+- `/headers` returns all the headers client sent to the server
+- `/query` returns all query strings client requested from url
+- `/query/foo` returns the single query string called `foo` value
+- Not found on other routes
