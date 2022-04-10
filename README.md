@@ -31,6 +31,13 @@ Or alternatively, instead of build and manually run the executable, you can run 
 cargo run
 ```
 
+## Environment Variables
+
+You can set environment variables:
+
+- `PUBLIC_PATH` for setting the public path for you server, by defualt it's `/public` folder in the app
+- `PORT` for the port which webserver runs on it, by default it's `8080`
+
 ## Endpoints
 
 - `/` Loads a static HTML file from public directory
