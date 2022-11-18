@@ -15,7 +15,7 @@ git clone https://github.com/ErfunEb/rust_web_server.git
 After cloning the repo, go to the `rust_web_server` directory:
 
 ```sh
-cd cmd_todos
+cd rust_web_server
 ```
 
 At the end, run the following command for build and run:
